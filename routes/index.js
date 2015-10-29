@@ -112,7 +112,7 @@ router.put('/posts/comment/:comment/upvote', auth, function (req, res, next) {
 
 router.post('/register', function (req, res, next) {
   if (!req.body.username || !req.body.password) {
-    res.status(401).json({ message: 'invalid username and passport. Bad validation' });
+    res.status(401).json({ message: 'Invalid username and passport. Bad validation' });
   } else {
     var user = new User();
     user.username = req.body.username;
@@ -126,7 +126,7 @@ router.post('/register', function (req, res, next) {
 
 router.post('/login', function (req, res, next) {
   if (!req.body.username || !req.body.password) {
-    res.status(400).json({ message: 'invalid username and passport. Bad validation' });
+    res.status(400).json({ message: 'Invalid username and passport. Bad validation' });
   } else {
     passport.authenticate('local', function (err, user, info) {
       if (err) { return next(err); }

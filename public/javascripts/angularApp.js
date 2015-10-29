@@ -1,10 +1,10 @@
 var app = angular.module("flapperNews", ['ui.router']);
 
 app.controller("MainCtrl", [
-  "$scope", "postFactory", function($scope, postFactory) {
+  "$scope", "postFactory", function ($scope, postFactory) {
     $scope.posts = postFactory.posts;
 
-    $scope.addPost = function() {
+    $scope.addPost = function () {
       postFactory.create({
         title: $scope.title,
         link: $scope.link
@@ -14,51 +14,51 @@ app.controller("MainCtrl", [
       $scope.title = "";
     }
 
-    $scope.incrementUpvotes = function(post) {
+    $scope.incrementUpvotes = function (post) {
       postFactory.upvote(post);
     };
   }]);
 
-app.factory("postFactory",['$http', function($http) {
+app.factory("postFactory", ['$http', function ($http) {
   var postFactory = {
     posts: []
   };
 
-  postFactory.getAll = function() {
-    $http.get('/posts').success(function(data) {
+  postFactory.getAll = function () {
+    $http.get('/posts').success(function (data) {
       angular.copy(data, postFactory.posts);
-    }).error(function(data, status) {
+    }).error(function (data, status) {
       console.log("Couldn't retrieve data, " + status + ': ' + data);
     });
   };
 
-  postFactory.create = function(post) {
-    $http.post('/posts', post).success(function(post) {
+  postFactory.create = function (post) {
+    $http.post('/posts', post).success(function (post) {
       postFactory.posts.push(post);
     })
   }
 
-  postFactory.upvote = function(post) {
+  postFactory.upvote = function (post) {
     return $http.put('/posts/' + post._id + '/upvote')
-              .success(function(data) {
-                post.upvotes = data.upvotes;
-              });
+      .success(function (data) {
+        post.upvotes = data.upvotes;
+      });
   }
 
-  postFactory.upvoteComment = function(comment) {
-    return $http.put('/posts/' + comment._id + '/upvote').success(function(data){
+  postFactory.upvoteComment = function (comment) {
+    return $http.put('/posts/' + comment._id + '/upvote').success(function (data) {
       comment.upvotes = data.upvotes;
     });
   };
 
-  postFactory.addComment = function(post, comment) {
-    $http.post('/posts/' + post._id + '/comment', comment).success(function(data) {
+  postFactory.addComment = function (post, comment) {
+    $http.post('/posts/' + post._id + '/comment', comment).success(function (data) {
       post.comments.push(data);
     });
   }
 
-  postFactory.loadComments = function(post) {
-    $http.get('/posts/' + post._id + '/comments').success(function(data) {
+  postFactory.loadComments = function (post) {
+    $http.get('/posts/' + post._id + '/comments').success(function (data) {
       post.comments = data;
     });
   }
@@ -66,37 +66,108 @@ app.factory("postFactory",['$http', function($http) {
   return postFactory;
 }]);
 
-app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-    $stateProvider
-      .state('home', {
-        url: '/home',
-        templateUrl: '/home.html',
-        controller: 'MainCtrl',
-        resolve: {
-          postPromise: ['postFactory', function(postFactory) {
-            return postFactory.getAll();
-          }]
-        }
-      }).state('posts', {
-        url: '/posts/{id}',
-        templateUrl: '/posts.html',
-        controller: 'PostCtrl'
-      });
+app.factory('auth', ['$http', '$window', function ($http, $window) {
+  var auth = {};
 
-      $urlRouterProvider.otherwise('/home');
+  auth.saveToken = function (token) {
+    $window.localStorage['flapper-news-token'] = token;
+  };
+
+  auth.getToken = function () {
+    return $window.localStorage['flapper-news-token'];
+  };
+
+  auth.getPayload = function () {
+    var token = auth.getToken();
+    if (token) {
+      return JSON.parse($window.atob(token.split('.')[1]));
+    }
+  };
+
+  auth.isLoggedIn = function () {
+    var payload = auth.getPayload();
+    if (payload) {
+      return payload.exp > Date.now() / 1000;
+    } else {
+      return false;
+    }
+  };
+
+  auth.currentUser = function () {
+    var payload = auth.getPayload();
+    if (payload) {
+      return payload.username;
+    }
+  };
+
+  auth.register = function (user) {
+    return $http.post('/register', user).success(function (token) {
+      auth.saveToken(token);
+    });
+  };
+
+  auth.login = function (user) {
+    return $http.post('/login', user).success(function (token) {
+      auth.saveToken(token);
+    });
+  };
+
+  auth.logout = function () {
+    $window.localStorage.removeItem('flapper-news-token');
+  };
+
+  return auth;
+}]);
+
+app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+  $stateProvider
+    .state('home', {
+      url: '/home',
+      templateUrl: '/home.html',
+      controller: 'MainCtrl',
+      resolve: {
+        postPromise: ['postFactory', function (postFactory) {
+          return postFactory.getAll();
+        }]
+      }
+    }).state('posts', {
+      url: '/posts/{id}',
+      templateUrl: '/posts.html',
+      controller: 'PostCtrl'
+    }).state('login', {
+      url: '/login',
+      templateUrl: '/login.html',
+      controller: 'AuthController',
+      onEnter: ['$state', 'auth', function ($state, auth) {
+        if (auth.isLoggedIn()) {
+          $state.go('home');
+        }
+      }]
+    }).state('register', {
+      url: '/register',
+      templateUrl: '/register.html',
+      controller: 'AuthController',
+      onEnter: ['$state', 'auth', function ($state, auth) {
+        if (auth.isLoggedIn()) {
+          $state.go('home');
+        }
+      }]
+    });
+    
+  $urlRouterProvider.otherwise('/home');
 }]);
 
 app.controller("PostCtrl", [
-  "$scope", "$stateParams", '$http', "postFactory", function($scope, $stateParams, $http, postFactory) {
+  "$scope", "$stateParams", '$http', "postFactory", function ($scope, $stateParams, $http, postFactory) {
     $scope.post = postFactory.posts[$stateParams.id];
     postFactory.loadComments($scope.post);
 
-    $scope.incrementUpvotes = function(comment) {
+    $scope.incrementUpvotes = function (comment) {
       postFactory.upvoteComment(comment);
     };
 
-    $scope.addComment = function() {
-      if($scope.body === '') { return; }
+    $scope.addComment = function () {
+      if ($scope.body === '') { return; }
 
       postFactory.addComment(postFactory.posts[$stateParams.id], {
         author: 'User',
@@ -104,4 +175,24 @@ app.controller("PostCtrl", [
         upvotes: 0
       });
     }
+  }]);
+
+app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, $state, auth) {
+  $scope.user = {};
+
+  $scope.register = function () {
+    auth.register($scope.user).error(function (error) {
+      $scope.error = error;
+    }).then(function () {
+      $state.go('home');
+    });
+  };
+
+  $scope.login = function () {
+    auth.login($scope.user).error(function (error) {
+      $scope.error = error;
+    }).then(function () {
+      $state.go('home');
+    });
+  }
 }]);
