@@ -1,7 +1,7 @@
 var app = angular.module("flapperNews", ['ui.router']);
 
 app.controller("MainCtrl", [
-  "$scope", "postFactory", function ($scope, postFactory) {
+  "$scope", "postFactory", '$state', 'auth', function ($scope, postFactory, $state, auth) {
     $scope.posts = postFactory.posts;
 
     $scope.addPost = function () {
@@ -17,6 +17,12 @@ app.controller("MainCtrl", [
     $scope.incrementUpvotes = function (post) {
       postFactory.upvote(post);
     };
+    
+    $scope.logout = function() {
+      auth.logout();
+      $state.go('login');
+    };
+    
   }]);
 
 app.factory("postFactory", ['$http', function ($http) {
@@ -68,9 +74,14 @@ app.factory("postFactory", ['$http', function ($http) {
 
 app.factory('auth', ['$http', '$window', function ($http, $window) {
   var auth = {};
+  
+  auth.updateHeaders = function() {
+    $http.defaults.headers.common.Authorization = 'Bearer ' + $window.localStorage['flapper-news-token'];
+  };
 
   auth.saveToken = function (token) {
     $window.localStorage['flapper-news-token'] = token;
+    auth.updateHeaders();
   };
 
   auth.getToken = function () {
@@ -80,7 +91,7 @@ app.factory('auth', ['$http', '$window', function ($http, $window) {
   auth.getPayload = function () {
     var token = auth.getToken();
     if (token) {
-      return JSON.parse($window.atob(token.split('.')[1]));
+      return JSON.parse(window.atob(token.split('.')[1]));
     }
   };
 
@@ -108,12 +119,13 @@ app.factory('auth', ['$http', '$window', function ($http, $window) {
 
   auth.login = function (user) {
     return $http.post('/login', user).success(function (token) {
-      auth.saveToken(token);
+      auth.saveToken(token.token);
     });
   };
 
   auth.logout = function () {
     $window.localStorage.removeItem('flapper-news-token');
+    $http.defaults.headers.common.Authorization = '';
   };
 
   return auth;
@@ -159,6 +171,7 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
 
 app.controller("PostCtrl", [
   "$scope", "$stateParams", '$http', "postFactory", function ($scope, $stateParams, $http, postFactory) {
+    
     $scope.post = postFactory.posts[$stateParams.id];
     postFactory.loadComments($scope.post);
 

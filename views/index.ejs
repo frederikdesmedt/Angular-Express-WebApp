@@ -20,8 +20,9 @@
   </div>
 
   <script type="text/ng-template" id="/home.html">
-    <div class="page-header">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
       <h1>Flapper news</h1>
+      <button ng-click="logout()" class="btn btn-default pull-right">Logout</button>
     </div>
 
     <form ng-submit="addPost()">
