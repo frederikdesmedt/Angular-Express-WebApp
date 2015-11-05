@@ -61,17 +61,17 @@ router.get('/posts/:post', function (req, res, next) {
 });
 
 router.get('/posts/:post/comments', function (req, res, next) {
-  Comment.find({ Post: req.post._id }).exec(function (err, comments) {
+  /*Comment.find({ Post: req.post._id }).exec(function (err, comments) {
     if (err) { next(err); }
     else {
       res.json(comments);
     }
-  });
-  /*req.post.populate({ path: 'comments' }).exec(function(err, post) {
+  });*/
+  Post.findById(req.post._id).populate({ path: 'comments' }).exec(function(err, post) {
     if (err) { next(err); }
     res.json(post.comments);
     next();
-  });*/
+  });
 });
 
 router.put('/posts/:post/upvote', auth, function (req, res, next) {
@@ -99,7 +99,7 @@ router.post('/posts/:post/comment', auth, function (req, res, next) {
   });
 });
 
-router.put('/posts/comment/:comment/upvote', auth, function (req, res, next) {
+router.put('/comments/:comment/upvote', auth, function (req, res, next) {
   req.comment.upvote(function (err, comment) {
     if (err) { next(err); }
     else {

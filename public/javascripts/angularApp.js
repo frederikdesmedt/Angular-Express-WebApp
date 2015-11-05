@@ -52,7 +52,7 @@ app.factory("postFactory", ['$http', function ($http) {
   }
 
   postFactory.upvoteComment = function (comment) {
-    return $http.put('/posts/' + comment._id + '/upvote').success(function (data) {
+    return $http.put('/comments/' + comment._id + '/upvote').success(function (data) {
       comment.upvotes = data.upvotes;
     });
   };
@@ -140,12 +140,25 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
       resolve: {
         postPromise: ['postFactory', function (postFactory) {
           return postFactory.getAll();
-        }]
+        }], onEnter: ['$state', 'auth', function($state, auth) {
+        if (auth.isLoggedIn()) {
+          auth.updateHeaders();
+        } else {
+          $state.go('login');
+        }
+      }]
       }
     }).state('posts', {
       url: '/posts/{id}',
       templateUrl: '/posts.html',
-      controller: 'PostCtrl'
+      controller: 'PostCtrl',
+      onEnter: ['$state', 'auth', function($state, auth) {
+        if (auth.isLoggedIn()) {
+          auth.updateHeaders();
+        } else {
+          $state.go('login');
+        }
+      }]
     }).state('login', {
       url: '/login',
       templateUrl: '/login.html',
@@ -197,6 +210,7 @@ app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, 
     auth.register($scope.user).error(function (error) {
       $scope.error = error;
     }).then(function () {
+      auth.updateHeaders();
       $state.go('home');
     });
   };
@@ -205,6 +219,7 @@ app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, 
     auth.login($scope.user).error(function (error) {
       $scope.error = error;
     }).then(function () {
+      auth.updateHeaders();
       $state.go('home');
     });
   }
