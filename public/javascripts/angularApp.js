@@ -37,6 +37,12 @@ app.factory("postFactory", ['$http', function ($http) {
       console.log("Couldn't retrieve data, " + status + ': ' + data);
     });
   };
+  
+  postFactory.findById = function(id) {
+    return postFactory.posts.filter(function(val) {
+      return val._id == id;
+    })[0];
+  }
 
   postFactory.create = function (post) {
     $http.post('/posts', post).success(function (post) {
@@ -113,7 +119,7 @@ app.factory('auth', ['$http', '$window', function ($http, $window) {
 
   auth.register = function (user) {
     return $http.post('/register', user).success(function (token) {
-      auth.saveToken(token);
+      auth.saveToken(token.token);
     });
   };
 
@@ -140,25 +146,12 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
       resolve: {
         postPromise: ['postFactory', function (postFactory) {
           return postFactory.getAll();
-        }], onEnter: ['$state', 'auth', function($state, auth) {
-        if (auth.isLoggedIn()) {
-          auth.updateHeaders();
-        } else {
-          $state.go('login');
-        }
-      }]
+        }]
       }
     }).state('posts', {
       url: '/posts/{id}',
       templateUrl: '/posts.html',
-      controller: 'PostCtrl',
-      onEnter: ['$state', 'auth', function($state, auth) {
-        if (auth.isLoggedIn()) {
-          auth.updateHeaders();
-        } else {
-          $state.go('login');
-        }
-      }]
+      controller: 'PostCtrl'
     }).state('login', {
       url: '/login',
       templateUrl: '/login.html',
@@ -183,30 +176,38 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
 }]);
 
 app.controller("PostCtrl", [
-  "$scope", "$stateParams", '$http', "postFactory", function ($scope, $stateParams, $http, postFactory) {
+  "$scope", "$stateParams", '$http', "postFactory", 'auth', function ($scope, $stateParams, $http, postFactory, auth) {
     
-    $scope.post = postFactory.posts[$stateParams.id];
+    $scope.post = postFactory.findById($stateParams.id);
     postFactory.loadComments($scope.post);
 
     $scope.incrementUpvotes = function (comment) {
-      postFactory.upvoteComment(comment);
+      if (auth.isLoggedIn()) {
+        postFactory.upvoteComment(comment);
+      }
     };
 
     $scope.addComment = function () {
       if ($scope.body === '') { return; }
 
-      postFactory.addComment(postFactory.posts[$stateParams.id], {
-        author: 'User',
+      postFactory.addComment($scope.post, {
         body: $scope.body,
         upvotes: 0
       });
     }
+    
+    $scope.isLoggedIn = auth.isLoggedIn;
   }]);
 
 app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, $state, auth) {
   $scope.user = {};
 
   $scope.register = function () {
+    if ($scope.user.password !== $scope.user.repeatPassword) {
+      $scope.error = { message: "Passwords are not the same" };
+      return;
+    }
+    
     auth.register($scope.user).error(function (error) {
       $scope.error = error;
     }).then(function () {
@@ -223,4 +224,17 @@ app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, 
       $state.go('home');
     });
   }
+}]);
+
+app.controller('NavController', ['$scope', 'auth', '$state', function ($scope, auth, $state) {
+  
+  $scope.isLoggedIn = auth.isLoggedIn;
+  
+  $scope.currentUser = auth.currentUser;
+  
+  $scope.logOut = function() {
+    auth.logout();
+    $state.go('login');
+  };
+  
 }]);

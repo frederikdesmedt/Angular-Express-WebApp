@@ -29,7 +29,7 @@ router.post('/posts', auth, function (req, res, next) {
   var post = new Post(req.body);
   post.author = req.payload.username;
   post.save(function (err, post) {
-    if (err) { next(err); }
+    if (err) { return next(err); }
     res.json(post);
   })
 });
@@ -61,16 +61,11 @@ router.get('/posts/:post', function (req, res, next) {
 });
 
 router.get('/posts/:post/comments', function (req, res, next) {
-  /*Comment.find({ Post: req.post._id }).exec(function (err, comments) {
-    if (err) { next(err); }
-    else {
-      res.json(comments);
-    }
-  });*/
   Post.findById(req.post._id).populate({ path: 'comments' }).exec(function(err, post) {
-    if (err) { next(err); }
-    res.json(post.comments);
-    next();
+    if (err) { return next(err); }
+    else {
+      res.json(post.comments);
+    }
   });
 });
 
@@ -118,7 +113,7 @@ router.post('/register', function (req, res, next) {
     user.username = req.body.username;
     user.setPassword(req.body.password);
     user.save(function (err) {
-      if (err) { next(err); }
+      if (err) { return res.status(401).json({ message: 'User already exists. Please pick a new username.' }) }
       return res.json({ token: user.generateJWT() });
     });
   }
