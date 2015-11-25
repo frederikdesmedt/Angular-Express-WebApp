@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>My Angular App</title>
+  <title>Flapper News</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular.min.js">
 
@@ -15,7 +15,8 @@
 <body ng-app="flapperNews" class="container-fluid">
   <nav class="navbar navbar-default pull-right" ng-controller="NavController">
     <ul class="nav navbar-nav">
-      <li ng-show="isLoggedIn()"><a>{{ currentUser() }}</a></li>
+      <li ng-show="isLoggedIn()"><a>Welcome {{ currentUser() }}!</a></li>
+      <li ng-show="isLoggedIn()"><a></a></li>
       <li ng-show="isLoggedIn()"><a href="" ng-click="logOut()">Log Out</a></li>
       <li ng-hide="isLoggedIn()"><a href="/#/login">Log In</a></li>
       <li ng-hide="isLoggedIn()"><a href="/#/register">Register</a></li>
@@ -26,100 +27,5 @@
       <ui-view></ui-view>
     </div>
   </div>
-
-  <script type="text/ng-template" id="/home.html">
-    <div class="page-header">
-      <h1>Flapper news</h1>
-    </div>
-
-    <form ng-submit="addPost()">
-      <div class="form-group">
-        <input class="form-control" type="text" ng-model="title" placeholder="Type a title" />
-      </div>
-
-      <div class="form-group">
-        <input class="form-control" type="text" ng-model="link" placeholder="Link" />
-      </div>
-
-      <input class="btn" type="submit" name="Add a post" ng-disabled="!title" />
-    </form>
-
-    <div ng-repeat="post in posts | orderBy: '-upvotes'">
-      <span ng-click="incrementUpvotes(post)" class="glyphicon glyphicon-thumbs-up"></span>
-      <a href="{{post.link}}" ng-show="post.link">{{post.title}}</a>
-      <span ng-hide="post.link">{{post.title}}</span>
-      <span><a href="#/posts/{{post._id}}">Go to comments</a></span> upvotes: {{post.upvotes}}
-    </div>
-  </script>
-
-  <script type="text/ng-template" id="/posts.html">
-    <div class="page-header">
-      <h3>
-          <a href="{{post.link}}" ng-show="post.link">{{post.title}}</a>
-          <span ng-hide="post.link">{{post.title}}</span>
-        </h3>
-    </div>
-    <div ng-repeat="comment in post.comments | orderBy:'-upvotes'">
-      <span class="glyphicon glyphicon-thumbs-up" ng-click="incrementUpvotes(comment)" /> {{comment.upvotes}} - by {{comment.author}}
-      <span style="font-size: 20px; margin-top: 10px;">{{comment.body}}</span>
-    </div>
-
-    <form ng-show="isLoggedIn()" ng-submit="addComment()" style="margin-top: 30px;">
-      <h3>Add a new comment</h3>
-      <div class="form-group">
-        <input type="text" ng-model="body" class="form-control" placeholder="Type a comment..." />
-      </div>
-      <button class="btn btn-primary" type="submit">Add comment</button>
-    </form>
-    
-    <h3 ng-hide="isLoggedIn()">You must be <a href="/#/login">logged in</a> to comment</h3>
-  </script>
-
-  <script type="text/ng-template" id="/login.html">
-    <div class="page-header">
-      <h1>Flapper News</h1>
-    </div>
-
-    <div ng-show="error" class="alert alert-danger row">
-      <span>{{ error.message }}</span>
-    </div>
-
-    <form ng-submit="login()" style="margin-top:30px;">
-      <h3>Log In</h3>
-
-      <div class="form-group">
-        <input type="text" class="form-control" placeholder="Username" ng-model="user.username"></input>
-      </div>
-      <div class="form-group">
-        <input type="password" class="form-control" placeholder="Password" ng-model="user.password"></input>
-      </div>
-      <button type="submit" class="btn btn-primary">Log In</button>
-    </form>
-  </script>
-
-  <script type="text/ng-template" id="/register.html">
-    <div class="page-header">
-      <h1>Flapper News</h1>
-    </div>
-
-    <div ng-show="error" class="alert alert-danger row">
-      <span>{{ error.message }}</span>
-    </div>
-
-    <form ng-submit="register()" style="margin-top:30px;">
-      <h3>Register</h3>
-
-      <div class="form-group">
-        <input type="text" class="form-control" placeholder="Username" ng-model="user.username"></input>
-      </div>
-      <div class="form-group">
-        <input type="password" class="form-control" placeholder="Password" ng-model="user.password"></input>
-      </div>
-      <div class="form-group">
-        <input type="password" class="form-control" placeholder="Repeat password" ng-model="user.repeatPassword"></input>
-      </div>
-      <button type="submit" class="btn btn-primary">Register</button>
-    </form>
-  </script>
 </body>
 </html>

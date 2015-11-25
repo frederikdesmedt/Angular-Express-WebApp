@@ -1,7 +1,7 @@
-var app = angular.module("flapperNews", ['ui.router']);
+var app = angular.module('flapperNews', ['ui.router']);
 
-app.controller("MainCtrl", [
-  "$scope", "postFactory", '$state', 'auth', function ($scope, postFactory, $state, auth) {
+app.controller('MainCtrl', [
+  '$scope', 'postFactory', '$state', 'auth', function ($scope, postFactory, $state, auth) {
     $scope.posts = postFactory.posts;
 
     $scope.addPost = function () {
@@ -10,8 +10,8 @@ app.controller("MainCtrl", [
         link: $scope.link
       });
 
-      $scope.link = "";
-      $scope.title = "";
+      $scope.link = '';
+      $scope.title = '';
     }
 
     $scope.incrementUpvotes = function (post) {
@@ -25,7 +25,7 @@ app.controller("MainCtrl", [
     
   }]);
 
-app.factory("postFactory", ['$http', function ($http) {
+app.factory('postFactory', ['$http', function ($http) {
   var postFactory = {
     posts: []
   };
@@ -34,7 +34,7 @@ app.factory("postFactory", ['$http', function ($http) {
     $http.get('/posts').success(function (data) {
       angular.copy(data, postFactory.posts);
     }).error(function (data, status) {
-      console.log("Couldn't retrieve data, " + status + ': ' + data);
+      console.log('Couldn\'t retrieve data, ' + status + ': ' + data);
     });
   };
   
@@ -141,7 +141,7 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
   $stateProvider
     .state('home', {
       url: '/home',
-      templateUrl: '/home.html',
+      templateUrl: '/templates/home.html',
       controller: 'MainCtrl',
       resolve: {
         postPromise: ['postFactory', function (postFactory) {
@@ -150,11 +150,11 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
       }
     }).state('posts', {
       url: '/posts/{id}',
-      templateUrl: '/posts.html',
+      templateUrl: '/templates/posts.html',
       controller: 'PostCtrl'
     }).state('login', {
       url: '/login',
-      templateUrl: '/login.html',
+      templateUrl: '/templates/login.html',
       controller: 'AuthController',
       onEnter: ['$state', 'auth', function ($state, auth) {
         if (auth.isLoggedIn()) {
@@ -163,7 +163,7 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
       }]
     }).state('register', {
       url: '/register',
-      templateUrl: '/register.html',
+      templateUrl: '/templates/register.html',
       controller: 'AuthController',
       onEnter: ['$state', 'auth', function ($state, auth) {
         if (auth.isLoggedIn()) {
