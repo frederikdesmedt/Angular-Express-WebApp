@@ -17,12 +17,12 @@ app.controller('MainCtrl', [
     $scope.incrementUpvotes = function (post) {
       postFactory.upvote(post);
     };
-    
-    $scope.logout = function() {
+
+    $scope.logout = function () {
       auth.logout();
       $state.go('login');
     };
-    
+
   }]);
 
 app.factory('postFactory', ['$http', function ($http) {
@@ -37,9 +37,9 @@ app.factory('postFactory', ['$http', function ($http) {
       console.log('Couldn\'t retrieve data, ' + status + ': ' + data);
     });
   };
-  
-  postFactory.findById = function(id) {
-    return postFactory.posts.filter(function(val) {
+
+  postFactory.findById = function (id) {
+    return postFactory.posts.filter(function (val) {
       return val._id == id;
     })[0];
   }
@@ -80,8 +80,8 @@ app.factory('postFactory', ['$http', function ($http) {
 
 app.factory('auth', ['$http', '$window', function ($http, $window) {
   var auth = {};
-  
-  auth.updateHeaders = function() {
+
+  auth.updateHeaders = function () {
     $http.defaults.headers.common.Authorization = 'Bearer ' + $window.localStorage['flapper-news-token'];
   };
 
@@ -89,6 +89,10 @@ app.factory('auth', ['$http', '$window', function ($http, $window) {
     $window.localStorage['flapper-news-token'] = token;
     auth.updateHeaders();
   };
+  
+  auth.checkUsername = function(user) {
+    return $http.post('/available', user);
+  }
 
   auth.getToken = function () {
     return $window.localStorage['flapper-news-token'];
@@ -119,7 +123,7 @@ app.factory('auth', ['$http', '$window', function ($http, $window) {
 
   auth.register = function (user) {
     return $http.post('/register', user).success(function (token) {
-      auth.saveToken(token.token);
+      auth.login(user);
     });
   };
 
@@ -171,13 +175,13 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
         }
       }]
     });
-    
+
   $urlRouterProvider.otherwise('/home');
 }]);
 
 app.controller("PostCtrl", [
   "$scope", "$stateParams", '$http', "postFactory", 'auth', function ($scope, $stateParams, $http, postFactory, auth) {
-    
+
     $scope.post = postFactory.findById($stateParams.id);
     postFactory.loadComments($scope.post);
 
@@ -195,21 +199,33 @@ app.controller("PostCtrl", [
         upvotes: 0
       });
     }
-    
+
     $scope.isLoggedIn = auth.isLoggedIn;
   }]);
 
 app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, $state, auth) {
   $scope.user = {};
 
-  $scope.register = function () {
+  $scope.validatePassword = function () {
+    if (!$scope.user.repeatPassword) {
+      return false;
+    }
+    
     if ($scope.user.password !== $scope.user.repeatPassword) {
-      $scope.error = { message: "Passwords are not the same" };
+      $scope.error = { password: true };
+      return false;
+    }
+    
+    return true;
+  };
+
+  $scope.register = function () {
+    if (!$scope.validatePassword()) {
       return;
     }
     
-    auth.register($scope.user).error(function (error) {
-      $scope.error = error;
+    auth.register($scope.user).error(function (response) {
+      $scope.error = response;
     }).then(function () {
       auth.updateHeaders();
       $state.go('home');
@@ -224,17 +240,23 @@ app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, 
       $state.go('home');
     });
   }
+  
+  $scope.checkUsername = function() {
+    auth.checkUsername($scope.user).success(function (response) {
+      $scope.error = response;
+    });
+  }
 }]);
 
 app.controller('NavController', ['$scope', 'auth', '$state', function ($scope, auth, $state) {
-  
+
   $scope.isLoggedIn = auth.isLoggedIn;
-  
+
   $scope.currentUser = auth.currentUser;
-  
-  $scope.logOut = function() {
+
+  $scope.logOut = function () {
     auth.logout();
     $state.go('login');
   };
-  
+
 }]);

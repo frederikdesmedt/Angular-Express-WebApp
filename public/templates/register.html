@@ -1,22 +1,26 @@
-<div class="page-header">
-	<h1>Flapper News</h1>
+<div ng-show="error.usernameTaken || error.missingFields" class="alert alert-danger row">
+	<span ng-show="error.usernameTaken">This username is taken, please pick another one.</span>
+	<span ng-show="error.missingFields">Please fill in all fields.</span>
 </div>
 
-<div ng-show="error" class="alert alert-danger row">
-	<span>{{ error.message }}</span>
-</div>
-
-<form ng-submit="register()" style="margin-top:30px;">
+<form ng-submit="register()" name="registrationForm" style="margin-top:30px;" novalidate>
 	<h3>Register</h3>
 
 	<div class="form-group">
-		<input type="text" class="form-control" placeholder="Username" ng-model="user.username"></input>
+		<input type="text" class="form-control" placeholder="Pick a username" ng-model="user.username" required name="username" username></input>
+	</div>
+	<div ng-show="error.taken" class="alert alert-danger row form-validation-error">
+		<span>Username is taken, please pick a different one.</span>
 	</div>
 	<div class="form-group">
-		<input type="password" class="form-control" placeholder="Password" ng-model="user.password"></input>
+		<input type="password" class="form-control" placeholder="Pick a password" ng-model="user.password" required name="password"></input>
+	</div>
+	<div ng-show="error.password" class="alert alert-danger row form-validation-error">
+		<span>Passwords do not match, please type them in again.</span>
 	</div>
 	<div class="form-group">
-		<input type="password" class="form-control" placeholder="Repeat password" ng-model="user.repeatPassword"></input>
+		<input type="password" class="form-control" placeholder="Repeat the password you just entered" ng-model="user.repeatPassword" ng-blur="validatePassword()"
+		required />
 	</div>
-	<button type="submit" class="btn btn-primary">Register</button>
+	<button type="submit" class="btn btn-primary" required ng-disabled="registrationForm.$invalid">Register</button>
 </form>

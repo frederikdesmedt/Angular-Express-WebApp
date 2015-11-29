@@ -61,7 +61,7 @@ router.get('/posts/:post', function (req, res, next) {
 });
 
 router.get('/posts/:post/comments', function (req, res, next) {
-  Post.findById(req.post._id).populate({ path: 'comments' }).exec(function(err, post) {
+  Post.findById(req.post._id).populate({ path: 'comments' }).exec(function (err, post) {
     if (err) { return next(err); }
     else {
       res.json(post.comments);
@@ -107,13 +107,13 @@ router.put('/comments/:comment/upvote', auth, function (req, res, next) {
 
 router.post('/register', function (req, res, next) {
   if (!req.body.username || !req.body.password) {
-    res.status(401).json({ message: 'Invalid username and passport. Bad validation' });
+    res.status(401).json({ missingFields: true });
   } else {
     var user = new User();
     user.username = req.body.username;
     user.setPassword(req.body.password);
     user.save(function (err) {
-      if (err) { return res.status(401).json({ message: 'User already exists. Please pick a new username.' }) }
+      if (err) { return res.status(401).json({ usernameTaken: true }) }
       return res.json({ token: user.generateJWT() });
     });
   }
@@ -121,15 +121,30 @@ router.post('/register', function (req, res, next) {
 
 router.post('/login', function (req, res, next) {
   if (!req.body.username || !req.body.password) {
-    res.status(400).json({ message: 'Invalid username and passport. Bad validation' });
+    res.status(400).json({ missingFields: true });
   } else {
     passport.authenticate('local', function (err, user, info) {
       if (err) { return next(err); }
       if (!user) { return res.status(401).json(info); }
       else {
-        return res.json({token: user.generateJWT()});
+        return res.json({ token: user.generateJWT() });
       }
     })(req, res, next);
+  }
+});
+
+router.post('/available', function (req, res, next) {
+  if (!req.body.username) {
+    res.status(400).json({ missingFields: true });
+  } else {
+    User.find({ username: req.body.username }, function (err, result) {
+      console.log(result);
+      if (result.length > 0) {
+        return res.json({ taken: true });
+      } else {
+        return res.json({ taken: false });
+      }
+    });
   }
 });
 
