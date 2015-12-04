@@ -1,4 +1,4 @@
-<div ng-show="error" class="alert alert-danger row">
+<div ng-show="error.message" class="alert alert-danger row">
 	<span>{{ error.message }}</span>
 </div>
 
@@ -11,5 +11,5 @@
 	<div class="form-group">
 		<input type="password" class="form-control" placeholder="Password" ng-model="user.password"></input>
 	</div>
-	<button type="submit" class="btn btn-primary">Log In</button>
+	<md-button class="md-primary md-raised" type="submit">Log in</md-button>
 </form>

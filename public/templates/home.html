@@ -7,12 +7,35 @@
 		<input class="form-control" type="text" ng-model="link" placeholder="Link" />
 	</div>
 
-	<input class="btn" type="submit" value="Add a post" ng-disabled="!title"/>
+	<md-button class="md-primary md-raised" type="submit" ng-disabled="!title">Add a post</md-button>
 </form>
 
-<div ng-repeat="post in posts | orderBy: '-upvotes'">
-	<span ng-click="incrementUpvotes(post)" class="glyphicon glyphicon-thumbs-up"></span>
-	<a href="{{post.link}}" ng-show="post.link">{{post.title}}</a>
-	<span ng-hide="post.link">{{post.title}}</span>
-	<span><a href="#/posts/{{post._id}}">Go to comments</a></span> upvotes: {{post.upvotes}}
+<md-content class="md-padding" layout="row" layout-wrap="" layout-align="center start">
+	<div ng-repeat="post in posts | orderBy: '-upvotes.length'" flex-gt-sm="50" flex-sm="100">
+		<md-card class="md-padding">
+			<div class="md-headline" layout="row" layout-align="space-between start">
+				<div layout-align="space-around start" class="column">
+					<div id="card-title">
+						<a href="{{post.link}}" ng-show="post.link">{{post.title}}</a>
+						<span ng-hide="post.link">{{post.title}}</span>
+					</div>
+					<div>
+						<span class="md-subhead" ng-show="post.upvotes.length > 0">{{post.upvotes.length}} people love this post</span>
+						<span class="md-subhead" ng-show="post.upvotes.length == 0">Nobody loves this post yet, give it some love</span>
+					</div>
+				</div>
+				<div layout="column" ng-cloak>
+					<md-button ng-hide="post.doILike" class="md-icon-button" aria-label="Upvote" ng-click="incrementUpvotes(post)">
+						<md-icon class="md-icon-button red" md-font-library="material-icons" aria-label="Upvote">favorite_outline</md-icon>
+					</md-button>
+					<md-button ng-show="post.doILike" class="md-icon-button" aria-label="Downvote" ng-click="decrementUpvotes(post)">
+						<md-icon class="md-icon-button red" md-font-library="material-icons" aria-label="Upvote">favorite</md-icon>
+					</md-button>
+					<md-button class="md-icon-button" aria-label="Comments" ng-href="#/posts/{{post._id}}">
+						<md-icon class="md-icon-button" md-font-library="material-icons" aria-label="Comments">comment</md-icon>
+					</md-button>
+				</div>
+			</div>
+		</md-card>
+</md-content>
 </div>

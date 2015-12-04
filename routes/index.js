@@ -6,11 +6,14 @@ var Comment = mongoose.model('Comment');
 var User = mongoose.model('User');
 var passport = require('passport');
 var jwt = require('express-jwt');
+var serialization = require('../middlewares/modelSerialization');
 
 // Authentication JsonWebToken middleware
 var auth = jwt({
   secret: 'SECRET', userProperty: 'payload'
 });
+
+var postSerialization = serialization.posts;
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -22,8 +25,9 @@ router.get('/posts', function (req, res, next) {
   Post.find(function (err, posts) {
     if (err) { next(err); }
     res.json(posts);
+    return next();
   });
-});
+}, postSerialization);
 
 router.post('/posts', auth, function (req, res, next) {
   var post = new Post(req.body);
@@ -70,12 +74,56 @@ router.get('/posts/:post/comments', function (req, res, next) {
 });
 
 router.put('/posts/:post/upvote', auth, function (req, res, next) {
-  req.post.upvote(function (err, post) {
+  Post.findById(req.post._id).populate({ path: 'upvotes' }).exec(function (err, post) {
     if (err) { return next(err); }
-    else if (!post) { return next(new Error("Couldn't find post")); }
-    else {
-      res.json(post);
+
+    User.findById(req.payload._id, function (err, user) {
+      for (var elem in post.upvotes) {
+        if ("" + post.upvotes[elem]._id == "" + user._id) {
+          return res.json(post);
+        }
+      }
+
+      post.upvotes.push(user);
+      post.save(function (err, post) {
+        if (err) { return next(err); }
+        else if (!post) { return next(new Error("Couldn't find post")); }
+        else {
+          res.json(post);
+        }
+      });
+    });
+  });
+});
+
+router.put('/posts/:post/downvote', auth, function (req, res, next) {
+  Post.findById(req.post._id).populate({ path: 'upvotes' }).exec(function (err, post) {
+    if (err) {
+      return next(err);
     }
+
+    User.findById(req.payload._id, function (err, user) {
+      var present = false;
+      for (var elem in post.upvotes) {
+        if ("" + post.upvotes[elem]._id == "" + user._id) {
+          present = true;
+          break;
+        }
+      }
+
+      if (!present) {
+        return res.json(post);
+      }
+
+      post.upvotes.pull(user);
+      post.save(function (err, post) {
+        if (err) { return next(err); }
+        else if (!post) { return next(new Error("Couldn't find post")); }
+        else {
+          res.json(post);
+        }
+      });
+    });
   });
 });
 
@@ -86,7 +134,7 @@ router.post('/posts/:post/comment', auth, function (req, res, next) {
   bodyComment.save(function (err, comment) {
     if (err) { return next(err); }
     if (!comment) { return next(new Error("Couldn't save comment")); }
-    req.post.comments.push(comment)
+    req.post.comments.push(comment);
     req.post.save(function (err, post) {
       if (err) { return next(err); }
       res.json(comment);
@@ -137,7 +185,7 @@ router.post('/available', function (req, res, next) {
   if (!req.body.username) {
     res.status(400).json({ missingFields: true });
   } else {
-    User.find({ username: req.body.username }, function (err, result) {
+    User.find({ username: req.body.username.toLowerCase() }, function (err, result) {
       console.log(result);
       if (result.length > 0) {
         return res.json({ taken: true });

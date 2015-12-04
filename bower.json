@@ -1,0 +1,24 @@
+{
+  "name": "flapper-news-express",
+  "description": "Project for WebApps",
+  "main": "",
+  "authors": [
+    "frederikdesmedt <frederik.de.smedt@hotmail.com>"
+  ],
+  "license": "MIT",
+  "moduleType": [
+    "es6",
+    "node"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-material": "~0.11.4"
+  }
+}

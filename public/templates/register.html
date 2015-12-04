@@ -7,10 +7,15 @@
 	<h3>Register</h3>
 
 	<div class="form-group">
-		<input type="text" class="form-control" placeholder="Pick a username" ng-model="user.username" required name="username" username></input>
+		<input type="text" class="form-control" placeholder="Pick a username" ng-model="user.username" required name="username" username error="error"></input>
 	</div>
 	<div ng-show="error.taken" class="alert alert-danger row form-validation-error">
+		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 		<span>Username is taken, please pick a different one.</span>
+	</div>
+	<div ng-show="error.taken === false" class="success alert-success row form-validation-error">
+		<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+		<span>This username is available</span>
 	</div>
 	<div class="form-group">
 		<input type="password" class="form-control" placeholder="Pick a password" ng-model="user.password" required name="password"></input>
@@ -22,5 +27,5 @@
 		<input type="password" class="form-control" placeholder="Repeat the password you just entered" ng-model="user.repeatPassword" ng-blur="validatePassword()"
 		required />
 	</div>
-	<button type="submit" class="btn btn-primary" required ng-disabled="registrationForm.$invalid">Register</button>
+	<md-button class="md-primary md-raised" type="submit" required ng-disabled="registrationForm.$invalid">Register</md-button>
 </form>
