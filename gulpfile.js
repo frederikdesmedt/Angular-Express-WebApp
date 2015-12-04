@@ -4,17 +4,14 @@ var bower = require('gulp-bower');
 var browserSync = require('browser-sync');
 var nodemon = require('gulp-nodemon');
 var express = require('express');
-var app = express();
 
 var plugins = gulpLoadPlugins();
 
 var testFolder = './test';
 
-gulp.task('default', ['bower', 'env-dev', 'nodemon']);
+gulp.task('default', ['bower', 'nodemon']);
 
-gulp.task('dev', ['env-dev', 'default']);
-
-gulp.task('runTests', function () {
+gulp.task('test', function () {
     return gulp.src(testFolder + '/*.js')
         .pipe(plugins.mocha());
 });
@@ -35,8 +32,4 @@ gulp.task('nodemon', function (cb) {
             started = true;
         }
     });
-});
-
-gulp.task('env-dev', function () {
-    app.set('env', 'development');
 });

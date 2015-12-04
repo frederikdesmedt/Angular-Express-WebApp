@@ -7,7 +7,7 @@ app.controller('MainCtrl', [
 		$scope.addPost = function () {
 			postFactory.create({
 				title: $scope.title,
-				link: $scope.link.indexOf("http://") == -1 && $scope.link.indexOf("https://") == -1 ? "http://" + $scope.link : $scope.link
+				link: !$scope.link ? '' : $scope.link.indexOf("http://") == -1 && $scope.link.indexOf("https://") == -1 ? "http://" + $scope.link : $scope.link
 			});
 
 			$scope.link = '';

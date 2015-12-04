@@ -4,8 +4,7 @@ function serializePost(post) {
 		author: post.author,
 		title: post.title,
 		comments: post.comments,
-		link: post.link,
-		upvotesArray: post.upvotes
+		link: post.link
 	};
 
 	var count = 0;

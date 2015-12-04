@@ -143,11 +143,57 @@ router.post('/posts/:post/comment', auth, function (req, res, next) {
 });
 
 router.put('/comments/:comment/upvote', auth, function (req, res, next) {
-  req.comment.upvote(function (err, comment) {
-    if (err) { next(err); }
-    else {
-      res.json(comment);
+  Comment.findById(req.comment._id).populate({ path: 'upvotes' }).exec(function (err, comment) {
+    
+    if (err) { return next(err); }
+
+    User.findById(req.payload._id, function (err, user) {
+      for (var elem in comment.upvotes) {
+        if ("" + comment.upvotes[elem]._id == "" + user._id) {
+          return res.json(comment);
+        }
+      }
+
+      comment.upvotes.push(user);
+      comment.save(function (err, comment) {
+        if (err) { return next(err); }
+        else if (!comment) { return next(new Error("Couldn't find comment")); }
+        else {
+          res.json(comment);
+        }
+      });
+    });
+  });
+});
+
+router.put('/comments/:comment/downvote', auth, function (req, res, next) {
+  Comment.findById(req.comment._id).populate({ path: 'upvotes' }).exec(function (err, comment) {
+    if (err) {
+      return next(err);
     }
+
+    User.findById(req.payload._id, function (err, user) {
+      var present = false;
+      for (var elem in comment.upvotes) {
+        if ("" + comment.upvotes[elem]._id == "" + user._id) {
+          present = true;
+          break;
+        }
+      }
+
+      if (!present) {
+        return res.json(comment);
+      }
+
+      comment.upvotes.pull(user);
+      comment.save(function (err, comment) {
+        if (err) { return next(err); }
+        else if (!comment) { return next(new Error("Couldn't find comment")); }
+        else {
+          res.json(comment);
+        }
+      });
+    });
   });
 });
 

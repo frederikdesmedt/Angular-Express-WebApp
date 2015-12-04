@@ -5,23 +5,38 @@ app.factory('postFactory', ['$http', 'auth', function ($http, auth) {
 		posts: []
 	};
 
+	// private
+	var getInternal = function () {
+		return $http.get('/posts').then(function (data) {
+			angular.copy(data.data, postFactory.posts);
+			return data;
+		});
+	}
+
 	postFactory.getAll = function () {
-		$http.get('/posts').success(function (data) {
-			angular.copy(data, postFactory.posts);
+		getInternal().then(function (data) {
 			if (auth.isLoggedIn()) {
 				postFactory.posts.forEach(function (post) {
 					post.doILike = post.upvotes.indexOf(auth.getPayload()._id) >= 0;
 				});
 			}
-		}).error(function (data, status) {
-			console.log('Couldn\'t retrieve data, ' + status + ': ' + data);
 		});
 	};
 
 	postFactory.findById = function (id) {
-		return postFactory.posts.filter(function (val) {
-			return val._id == id;
-		})[0];
+		return promise = new Promise(function (resolve, reject) {
+			var resolveFunction = function () {
+				resolve(postFactory.posts.filter(function (val) {
+					return val._id == id;
+				})[0]);
+			}
+
+			if (postFactory.posts.length == 0) {
+				getInternal().then(resolveFunction);
+			} else {
+				resolveFunction();
+			}
+		});
 	}
 
 	postFactory.create = function (post) {
@@ -50,6 +65,12 @@ app.factory('postFactory', ['$http', 'auth', function ($http, auth) {
 		});
 	};
 
+	postFactory.downvoteComment = function (comment) {
+		return $http.put('/comments/' + comment._id + '/downvote').success(function (data) {
+			comment.upvotes = data.upvotes;
+		});
+	}
+
 	postFactory.addComment = function (post, comment) {
 		$http.post('/posts/' + post._id + '/comment', comment).success(function (data) {
 			post.comments.push(data);
@@ -59,6 +80,9 @@ app.factory('postFactory', ['$http', 'auth', function ($http, auth) {
 	postFactory.loadComments = function (post) {
 		$http.get('/posts/' + post._id + '/comments').success(function (data) {
 			post.comments = data;
+			post.comments.forEach(function (comment) {
+				comment.doILike = comment.upvotes.indexOf(auth.getPayload()._id) >= 0;
+			});
 		});
 	};
 

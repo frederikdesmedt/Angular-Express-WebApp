@@ -14,14 +14,15 @@
 	<div ng-repeat="post in posts | orderBy: '-upvotes.length'" flex-gt-sm="50" flex-sm="100">
 		<md-card class="md-padding">
 			<div class="md-headline" layout="row" layout-align="space-between start">
-				<div layout-align="space-around start" class="column">
+				<div layout-align="space-around center" class="column">
 					<div id="card-title">
-						<a href="{{post.link}}" ng-show="post.link">{{post.title}}</a>
+						<a ng-href="{{post.link}}" ng-show="post.link" target="_blank">{{post.title}}</a>
 						<span ng-hide="post.link">{{post.title}}</span>
 					</div>
 					<div>
-						<span class="md-subhead" ng-show="post.upvotes.length > 0">{{post.upvotes.length}} people love this post</span>
-						<span class="md-subhead" ng-show="post.upvotes.length == 0">Nobody loves this post yet, give it some love</span>
+						<span class="md-subhead" ng-show="post.upvotes.length === 1">One person loves this</span>
+						<span class="md-subhead" ng-show="post.upvotes.length > 1">{{post.upvotes.length}} people love this</span>
+						<span class="md-subhead" ng-show="post.upvotes.length == 0">Nobody loves this yet, give it some love</span>
 					</div>
 				</div>
 				<div layout="column" ng-cloak>
