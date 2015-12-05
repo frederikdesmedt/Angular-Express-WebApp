@@ -8,9 +8,12 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var serialization = require('./middlewares/modelSerialization');
 
+var database = '/webapps';
+var ip = process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost';
+var port = process.env.OPENSHIFT_MONGODB_DB_PORT || '';
+
 // database config
-mongoose.connect('mongodb://localhost/news');
-// mongoose.connect('mongo-connection', 'mongodb://admin:zh_jK7ACyykE@$OPENSHIFT_MONGODB_DB_HOST:$OPENSHIFT_MONGODB_DB_PORT/webapps');
+mongoose.connect('mongodb://' + ip + (port ? ':' + port : '') + database);
 require('./models/Posts');
 require('./models/Comments');
 require('./models/Users');
