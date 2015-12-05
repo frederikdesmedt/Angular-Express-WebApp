@@ -1,6 +1,6 @@
 var app = angular.module('flapperNews');
 
-app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, $state, auth) {
+app.controller('AuthController', ['$scope', '$state', 'auth', 'Notification', function ($scope, $state, auth, Notification) {
 
 	$scope.error = {};
 	$scope.user = {};
@@ -28,6 +28,10 @@ app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, 
 		}).then(function () {
 			auth.updateHeaders();
 			$state.go('home');
+			Notification.success({
+				message: 'Welcome to the forum, you have fun!',
+				title: 'Succesfully registered'
+			});
 		});
 	};
 
@@ -36,6 +40,10 @@ app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, 
 			$scope.error = error;
 		}).then(function () {
 			auth.updateHeaders();
+			Notification({
+				message: 'Feel free to post, like or comment anything you feel like!',
+				title: 'Welcome back ' + auth.currentUser()
+			});
 			$state.go('home');
 		});
 	};

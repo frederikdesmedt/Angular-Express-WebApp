@@ -39,6 +39,11 @@ router.post('/posts', auth, function (req, res, next) {
 });
 
 router.param('post', function (req, res, next, id) {
+  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    res.status(400);
+    return next();
+  }
+
   Post.findById(id).exec(function (err, post) {
     if (err) { next(err); }
     else if (!post) { next(new Error("Couldn't find post")); }
@@ -50,6 +55,11 @@ router.param('post', function (req, res, next, id) {
 });
 
 router.param('comment', function (req, res, next, id) {
+  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    res.status(400);
+    return next();
+  }
+
   Comment.findById(id).exec(function (err, comment) {
     if (err) { next(err); }
     else if (!comment) { next(new Error("Couldn't find comment")); }
@@ -144,7 +154,7 @@ router.post('/posts/:post/comment', auth, function (req, res, next) {
 
 router.put('/comments/:comment/upvote', auth, function (req, res, next) {
   Comment.findById(req.comment._id).populate({ path: 'upvotes' }).exec(function (err, comment) {
-    
+
     if (err) { return next(err); }
 
     User.findById(req.payload._id, function (err, user) {
@@ -201,7 +211,7 @@ router.put('/comments/:comment/downvote', auth, function (req, res, next) {
 
 router.post('/register', function (req, res, next) {
   if (!req.body.username || !req.body.password) {
-    res.status(401).json({ missingFields: true });
+    res.status(400).json({ missingFields: true });
   } else {
     var user = new User();
     user.username = req.body.username;
@@ -214,9 +224,7 @@ router.post('/register', function (req, res, next) {
 });
 
 router.post('/login', function (req, res, next) {
-  if (!req.body.username || !req.body.password) {
-    res.status(400).json({ missingFields: true });
-  } else {
+  if (req.body.username && req.body.password) {
     passport.authenticate('local', function (err, user, info) {
       if (err) { return next(err); }
       if (!user) { return res.status(401).json(info); }
@@ -224,6 +232,8 @@ router.post('/login', function (req, res, next) {
         return res.json({ token: user.generateJWT() });
       }
     })(req, res, next);
+  } else {
+    res.status(400).json({ missingFields: true });
   }
 });
 

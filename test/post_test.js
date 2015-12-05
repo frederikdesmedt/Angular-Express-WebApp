@@ -12,7 +12,7 @@ describe('GET /posts', function () {
 			expect(fetchedData).to.be.an('array');
 			expect(fetchedData).to.be.not.empty;
 			var post = fetchedData[0];
-
+			postId = post._id;
 			expect(post).to.have.all.keys('__v', '_id', 'comments', 'upvotes', 'link', 'title', 'author');
 			expect(post.comments).to.be.an('array');
 			expect(post.upvotes).to.be.a('array');
@@ -21,24 +21,47 @@ describe('GET /posts', function () {
 	});
 });
 
-var authorizedPostUrls = ['/posts', '/posts/123/comment'];
-var authorizedPutUrls = ['/posts/123/upvote', '/posts/123/downvote', '/comments/123/upvote', '/comments/123/downvote'];
+var post = 'post';
+var put = 'put';
+var get = 'get';
 
-authorizedPostUrls.forEach(function (url) {
-	checkUrlAuthorization('POST', url);
-});
+checkUrlForStatus(post, '/posts', 401, 'when not logged in');
+checkUrlForStatus(put, '/posts/1/upvote', 401, 'when not logged in and using invalid mongo id');
+checkUrlForStatus(put, '/posts/1/downvote', 401, 'when not logged in and using invalid mongo id');
+checkUrlForStatus(put, '/comments/1/upvote', 401, 'when not logged in and using invalid mongo id');
+checkUrlForStatus(put, '/comments/1/downvote', 401, 'when not logged in and using invalid mongo id');
+checkUrlForStatus(post, '/login', 400, 'when sending no data');
+checkUrlForStatus(post, '/register', 400, 'when sending no data');
+checkUrlForJson(post, '/login', 'should tell there are missing fields when sending no data', { missingFields: true });
+checkUrlForJson(post, '/register', 'should tell there are missing fields when sending no data', { missingFields: true });
 
-authorizedPutUrls.forEach(function (url) {
-	checkUrlAuthorization('PUT', url);
-});
+function checkUrlForStatus(method, url, status, when, json) {
+	describe(method.toUpperCase() + ' ' + url, function () {
+		it('should respond with ' + status + ' ' + when, function (done) {
+			agent[method](url).send(JSON.stringify(json || {})).expect(status, done);
+		});
+	});
+}
 
-function checkUrlAuthorization(method, url) {
-	describe(method + ' ' + url, function () {
-		it('should respond with 401, denying access', function (done) {
-			agent.post('/posts').send({
-				// shouldn't matter what you send
-			}).expect(401);
-			done();
+function checkUrlForStatusAndLog(method, url, status, when, json) {
+	describe(method.toUpperCase() + ' ' + url, function () {
+		it('should respond with ' + status + ' ' + when, function (done) {
+			agent[method](url).send(JSON.stringify(json || {})).end(function (err, res) {
+				console.log(res);
+				if (err) { return done(err); }
+			});
+		});
+	});
+}
+
+function checkUrlForJson(method, url, should, receive, send) {
+	describe(method.toUpperCase() + ' ' + url, function () {
+		it(should, function (done) {
+			agent[method](url).send(JSON.stringify(send || {})).end(function (err, res) {
+				if (err) { return done(err); }
+				expect(res.body).to.deep.equal(receive);
+				done();
+			});
 		});
 	});
 }

@@ -1,6 +1,6 @@
 var app = angular.module('flapperNews');
 
-app.controller('NavController', ['$scope', 'auth', '$state', function ($scope, auth, $state) {
+app.controller('NavController', ['$scope', 'auth', '$state', 'Notification', function ($scope, auth, $state, Notification) {
 
   $scope.isLoggedIn = auth.isLoggedIn;
 
@@ -8,6 +8,9 @@ app.controller('NavController', ['$scope', 'auth', '$state', function ($scope, a
 
   $scope.logOut = function () {
     auth.logout();
+    Notification.warning({
+      message: 'Please do come back!', title: 'Goodbye'
+    });
     $state.go('login');
   };
 

@@ -1,6 +1,6 @@
-var app = angular.module('flapperNews', ['ui.router', 'ngMaterial']);
+var app = angular.module('flapperNews', ['ui.router', 'ngMaterial', 'ui-notification', 'angular-loading-bar']);
 
-app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', 'NotificationProvider', function ($stateProvider, $urlRouterProvider, NotificationProvider) {
   $stateProvider
     .state('home', {
       url: '/home',
@@ -36,4 +36,8 @@ app.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $u
     });
 
   $urlRouterProvider.otherwise('/home');
+  
+  NotificationProvider.setOptions({
+    positionX: 'left', positionY: 'top'
+  });
 }]);
