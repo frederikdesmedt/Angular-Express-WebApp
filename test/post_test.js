@@ -37,8 +37,8 @@ function checkUrlAuthorization(method, url) {
 		it('should respond with 401, denying access', function (done) {
 			agent.post('/posts').send({
 				// shouldn't matter what you send
-			}).expect(401)
+			}).expect(401);
 			done();
 		});
 	});
-};
+}

@@ -35,7 +35,7 @@ router.post('/posts', auth, function (req, res, next) {
   post.save(function (err, post) {
     if (err) { return next(err); }
     res.json(post);
-  })
+  });
 });
 
 router.param('post', function (req, res, next, id) {
@@ -207,7 +207,7 @@ router.post('/register', function (req, res, next) {
     user.username = req.body.username;
     user.setPassword(req.body.password);
     user.save(function (err) {
-      if (err) { return res.status(401).json({ usernameTaken: true }) }
+      if (err) { return res.status(401).json({ usernameTaken: true }); }
       return res.json({ token: user.generateJWT() });
     });
   }
@@ -232,7 +232,6 @@ router.post('/available', function (req, res, next) {
     res.status(400).json({ missingFields: true });
   } else {
     User.find({ username: req.body.username.toLowerCase() }, function (err, result) {
-      console.log(result);
       if (result.length > 0) {
         return res.json({ taken: true });
       } else {

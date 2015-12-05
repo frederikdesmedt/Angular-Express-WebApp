@@ -20,7 +20,7 @@ app.controller('PostCtrl', [
 				comment.doILike = false;
 				postFactory.downvoteComment(comment);
 			}
-		}
+		};
 
 		$scope.addComment = function () {
 			if ($scope.body === '') { return; }
@@ -30,7 +30,7 @@ app.controller('PostCtrl', [
 			});
 			
 			$scope.body = '';
-		}
+		};
 
 		$scope.isLoggedIn = auth.isLoggedIn;
 	}]);

@@ -14,7 +14,7 @@ app.factory('auth', ['$http', '$window', function ($http, $window) {
 
 	auth.checkUsername = function (user) {
 		return $http.post('/available', user);
-	}
+	};
 
 	auth.getToken = function () {
 		return $window.localStorage['flapper-news-token'];

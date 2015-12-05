@@ -11,7 +11,7 @@ app.factory('postFactory', ['$http', 'auth', function ($http, auth) {
 			angular.copy(data.data, postFactory.posts);
 			return data;
 		});
-	}
+	};
 
 	postFactory.getAll = function () {
 		getInternal().then(function (data) {
@@ -24,40 +24,40 @@ app.factory('postFactory', ['$http', 'auth', function ($http, auth) {
 	};
 
 	postFactory.findById = function (id) {
-		return promise = new Promise(function (resolve, reject) {
+		return new Promise(function (resolve, reject) {
 			var resolveFunction = function () {
 				resolve(postFactory.posts.filter(function (val) {
 					return val._id == id;
 				})[0]);
-			}
+			};
 
-			if (postFactory.posts.length == 0) {
+			if (postFactory.posts.length === 0) {
 				getInternal().then(resolveFunction);
 			} else {
 				resolveFunction();
 			}
 		});
-	}
+	};
 
 	postFactory.create = function (post) {
 		$http.post('/posts', post).success(function (post) {
 			postFactory.posts.push(post);
-		})
-	}
+		});
+	};
 
 	postFactory.upvote = function (post) {
 		return $http.put('/posts/' + post._id + '/upvote').success(function (data) {
 			post.upvotes = data.upvotes;
 			post.doILike = true;
 		});
-	}
+	};
 
 	postFactory.downvote = function (post) {
 		return $http.put('/posts/' + post._id + '/downvote').success(function (data) {
 			post.upvotes = data.upvotes;
 			post.doILike = false;
 		});
-	}
+	};
 
 	postFactory.upvoteComment = function (comment) {
 		return $http.put('/comments/' + comment._id + '/upvote').success(function (data) {
@@ -69,7 +69,7 @@ app.factory('postFactory', ['$http', 'auth', function ($http, auth) {
 		return $http.put('/comments/' + comment._id + '/downvote').success(function (data) {
 			comment.upvotes = data.upvotes;
 		});
-	}
+	};
 
 	postFactory.addComment = function (post, comment) {
 		$http.post('/posts/' + post._id + '/comment', comment).success(function (data) {

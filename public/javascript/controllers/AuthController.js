@@ -44,5 +44,5 @@ app.controller('AuthController', ['$scope', '$state', 'auth', function ($scope, 
 		auth.checkUsername($scope.user).success(function (response) {
 			callback(response);
 		});
-	}
+	};
 }]);

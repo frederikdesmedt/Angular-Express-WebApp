@@ -10,11 +10,12 @@ var serialization = require('./middlewares/modelSerialization');
 
 // database config
 mongoose.connect('mongodb://localhost/news');
+// mongoose.connect('mongo-connection', 'mongodb://admin:zh_jK7ACyykE@$OPENSHIFT_MONGODB_DB_HOST:$OPENSHIFT_MONGODB_DB_PORT/webapps');
 require('./models/Posts');
 require('./models/Comments');
 require('./models/Users');
 
-require('./config/passport')
+require('./config/passport');
 
 var app = express();
 

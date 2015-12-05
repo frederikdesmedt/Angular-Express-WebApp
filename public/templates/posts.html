@@ -25,11 +25,17 @@
 </div>
 
 <form ng-show="isLoggedIn()" ng-submit="addComment()" style="margin-top: 30px;">
-	<h3>Add a new comment</h3>
-	<div class="form-group">
-		<input type="text" ng-model="body" class="form-control" placeholder="Type a comment..." />
-	</div>
-	<md-button class="btn md-primary md-raised" type="submit">Add comment</md-button>
+	<md-card class="md-padding">
+		<div class="md-headline" layout="row" layout-align="space-between center">
+			<div flex class="column">
+				<md-input-container class="md-block">
+					<label>Add a comment</label>
+					<input type="text" class="md-subhead" ng-model="body" columns="1" md-maxlength="150" rows="1"/>
+				</md-input-container>
+			</div>
+			<md-button class="btn md-primary md-raised" type="submit" ng-disabled="!body">Add comment</md-button>
+		</div>
+	</md-card>
 </form>
 
 <h3 ng-hide="isLoggedIn()">You must be <a href="/#/login">logged in</a> to comment</h3>

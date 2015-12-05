@@ -12,7 +12,7 @@ app.controller('MainCtrl', [
 
 			$scope.link = '';
 			$scope.title = '';
-		}
+		};
 
 		$scope.incrementUpvotes = function (post) {
 			postFactory.upvote(post);
@@ -20,7 +20,7 @@ app.controller('MainCtrl', [
 
 		$scope.decrementUpvotes = function (post) {
 			postFactory.downvote(post);
-		}
+		};
 
 		$scope.logout = function () {
 			auth.logout();
