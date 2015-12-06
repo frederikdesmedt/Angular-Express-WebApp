@@ -24,6 +24,8 @@ OpenShift heeft wel meer uitgebreide support maar maakt geen gebruik van gulp, m
 SSH-sessie zal dan 24/7 moeten opstaan, terwijl deze na 5 minuten van inactivity timeout. In een OpenShift DIY-cartridge kan dit wel gedaan worden
 maar daar zijn de maximum ondersteunde NPM & Node versies respectievelijk 1.1.37 & 0.6.20. Deze zijn echter te oud om de applicatie te draaien,
 er komen undefined errors omdat dependencies niet ingeladen kunnen worden of incompatibel zijn.
+
+**Update: De applicatie draait op de cloud-provider Heroku, met een Azure MongoDB database en kan hier gevonden worden: https://fds-webapps.herokuapp.com**
 Uitvoeren
 ---------
 Clone deze repository:
